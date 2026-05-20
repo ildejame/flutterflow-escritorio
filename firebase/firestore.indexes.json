@@ -1,0 +1,380 @@
+{
+  "indexes": [
+    {
+      "collectionGroup": "InfMotos",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "TipoVehiculo",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "Clave",
+          "order": "ASCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "Establecimientos",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "Ruta",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "TipoPago",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "SoloFecha",
+          "order": "ASCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "Establecimientos",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "Ruta",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "TipoPago",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "SoloFecha",
+          "order": "DESCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "Establecimientos",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "TipoPago",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "FechadeUltimoPago",
+          "order": "ASCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "Establecimientos",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "SoloFecha",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "FechaUltimoPagoDiario",
+          "order": "DESCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "Establecimientos",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "TipoPago",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "FechadeUltimoPago",
+          "order": "DESCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "ListasPJEV",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "Tipodelista",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "nombredeelemento",
+          "order": "ASCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "Establecimientos",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "TipoPago",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "Fecha",
+          "order": "DESCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "Infracciones",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "Uid",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "FechaInf",
+          "order": "DESCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "Establecimientos",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "GiroDeColeccion",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "TipoPago",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "Fecha",
+          "order": "DESCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "Establecimientos",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "Ruta",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "TipoPago",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "FechadeUltimoPago",
+          "order": "ASCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "PagosAnuales",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "SoloFechaAnual",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "NombreCobrador",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "Fecha",
+          "order": "DESCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "PagosDiarios",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "SoloFecha",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "Fecha",
+          "order": "DESCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "PagosDiarios",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "SoloFecha",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "NombreCobrador",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "Fecha",
+          "order": "DESCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "bienesmuebles",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "nivel2direccion",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "nivel1organizacion",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "nivel3jurisdiccion",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "numeroinventario",
+          "order": "ASCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "bienesmuebles",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "nivel2direccion",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "nivel1organizacion",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "nivel3jurisdiccion",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "estatusdelbien",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "inventario2025",
+          "order": "ASCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "bienesmuebles",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "nivel2direccion",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "nivel1organizacion",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "nivel3jurisdiccion",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "anexo",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "numeroinventario",
+          "order": "ASCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "bienesmuebles",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "foliovale",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "inventario2025",
+          "order": "ASCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "bienesmuebles",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "nivel2direccion",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "nombre",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "inventario2025",
+          "order": "ASCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "users",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "permiso",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "display_name",
+          "order": "ASCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "vales2",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "foliovale",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "fecha",
+          "order": "DESCENDING"
+        }
+      ]
+    },
+    {
+      "collectionGroup": "bienesmuebles",
+      "queryScope": "COLLECTION",
+      "fields": [
+        {
+          "fieldPath": "nivel2direccion",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "depositario",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "estatusdelbien",
+          "order": "ASCENDING"
+        },
+        {
+          "fieldPath": "inventario2025",
+          "order": "ASCENDING"
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "585826507852",
+    "project_id": "inventarios-pjev",
+    "storage_bucket": "inventarios-pjev.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:585826507852:android:50bbaf7b72294a2364e8e9",
+        "android_client_info": {
+          "package_name": "com.mycompany.pjev"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyB5b4qyibsKis__s7bMH6NlMpRESOnuQjU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

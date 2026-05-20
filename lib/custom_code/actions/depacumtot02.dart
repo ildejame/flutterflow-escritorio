@@ -1,0 +1,631 @@
+// Automatic FlutterFlow imports
+import '/backend/backend.dart';
+import '/backend/schema/structs/index.dart';
+import '/flutter_flow/flutter_flow_theme.dart';
+import '/flutter_flow/flutter_flow_util.dart';
+import 'index.dart'; // Imports other custom actions
+import '/flutter_flow/custom_functions.dart'; // Imports custom functions
+import 'package:flutter/material.dart';
+// Begin custom action code
+// DO NOT REMOVE OR MODIFY THE CODE ABOVE!
+
+import 'package:http/http.dart' as http;
+import 'dart:convert';
+import 'package:pdf/pdf.dart';
+import 'package:pdf/widgets.dart' as pw;
+import 'dart:html' as html;
+import 'package:flutter/services.dart';
+import 'package:intl/intl.dart';
+
+Future depacumtot02(
+  BuildContext context,
+  String authToken,
+  List<String> ubicacionesNivel1,
+) async {
+  // Color personalizado institucional
+  const Color customGreen = Color(0xFF164b2d);
+  // URL base de PocketBase
+  final String pbBaseUrl = 'https://api.servidor-inventarios.xyz';
+
+  // ---------------------------------------------------------------------------
+  // 1. PREPARACIÓN DE UNIDADES
+  // ---------------------------------------------------------------------------
+  List<String> unidadesDisponibles = List.from(ubicacionesNivel1);
+
+  // Ordenar la lista alfabéticamente
+  unidadesDisponibles.sort((a, b) => a.compareTo(b));
+
+  // Asegurar que la opción 'TODOS' esté siempre al inicio
+  if (unidadesDisponibles.contains('TODOS')) {
+    unidadesDisponibles.remove('TODOS');
+  }
+  unidadesDisponibles.insert(0, 'TODOS');
+
+  // ---------------------------------------------------------------------------
+  // 2. DIÁLOGO DE CONFIGURACIÓN (Unidad, Año, Valor UMA)
+  // ---------------------------------------------------------------------------
+  final result = await showDialog<Map<String, dynamic>>(
+    context: context,
+    barrierDismissible: false,
+    builder: (context) {
+      String unidad = 'TODOS';
+      final TextEditingController umaController =
+          TextEditingController(text: '113.14');
+
+      int currentYear = DateTime.now().year;
+      // Mínimo permitido 2024
+      final TextEditingController yearController = TextEditingController(
+          text: (currentYear < 2024 ? 2024 : currentYear).toString());
+
+      String? yearErrorText;
+
+      bool validarYear() {
+        final year = int.tryParse(yearController.text);
+        if (year == null) {
+          yearErrorText = 'Número inválido';
+          return false;
+        }
+        if (year < 2024) {
+          yearErrorText = 'Mínimo 2024';
+          return false;
+        }
+        yearErrorText = null;
+        return true;
+      }
+
+      return StatefulBuilder(
+        builder: (ctx, setState) {
+          final double screenWidth = MediaQuery.of(context).size.width;
+          final double dialogWidth =
+              screenWidth > 600 ? 500 : screenWidth * 0.9;
+
+          return Theme(
+            data: Theme.of(context).copyWith(
+              colorScheme: ColorScheme.light(
+                primary: customGreen,
+                secondary: customGreen,
+              ),
+              radioTheme: RadioThemeData(
+                fillColor: WidgetStateProperty.resolveWith<Color>((states) {
+                  return states.contains(WidgetState.selected)
+                      ? customGreen
+                      : Colors.grey;
+                }),
+              ),
+            ),
+            child: AlertDialog(
+              title: const Text('Configuración Depreciación Acumulada'),
+              content: SizedBox(
+                width: dialogWidth,
+                child: SingleChildScrollView(
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: <Widget>[
+                      // --- SECCIÓN UNIDAD ---
+                      const Align(
+                        alignment: Alignment.centerLeft,
+                        child: Text('Filtro Unidad Presupuestal:',
+                            style: TextStyle(fontWeight: FontWeight.bold)),
+                      ),
+                      const SizedBox(height: 8),
+                      ConstrainedBox(
+                        constraints: const BoxConstraints(maxHeight: 250),
+                        child: Container(
+                          decoration: BoxDecoration(
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: ListView.builder(
+                            shrinkWrap: true,
+                            itemCount: unidadesDisponibles.length,
+                            itemBuilder: (context, index) {
+                              final unidadNombre = unidadesDisponibles[index];
+                              return RadioListTile<String>(
+                                dense: true,
+                                contentPadding:
+                                    const EdgeInsets.symmetric(horizontal: 8),
+                                title: Text(unidadNombre,
+                                    style: const TextStyle(fontSize: 12)),
+                                value: unidadNombre,
+                                groupValue: unidad,
+                                onChanged: (v) => setState(() => unidad = v!),
+                              );
+                            },
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 15),
+
+                      // --- SECCIÓN AÑO ---
+                      const Align(
+                        alignment: Alignment.centerLeft,
+                        child: Text('Año de Corte (acumulado hasta este año):',
+                            style: TextStyle(fontWeight: FontWeight.bold)),
+                      ),
+                      const SizedBox(height: 5),
+                      TextField(
+                        controller: yearController,
+                        keyboardType: TextInputType.number,
+                        decoration: InputDecoration(
+                          hintText: 'Ej. 2024',
+                          border: const OutlineInputBorder(),
+                          errorText: yearErrorText,
+                          isDense: true,
+                          focusedBorder: const OutlineInputBorder(
+                              borderSide: BorderSide(color: customGreen)),
+                        ),
+                        onChanged: (_) => setState(() => validarYear()),
+                      ),
+                      const SizedBox(height: 5),
+                      const Text(
+                        'Se sumarán todos los registros de depreciación desde el inicio hasta el año indicado (inclusive).',
+                        style: TextStyle(
+                            fontSize: 11,
+                            color: Colors.grey,
+                            fontStyle: FontStyle.italic),
+                      ),
+
+                      const SizedBox(height: 15),
+
+                      // --- SECCIÓN VALOR UMA ---
+                      const Align(
+                        alignment: Alignment.centerLeft,
+                        child: Text('Valor UMA (MXN):',
+                            style: TextStyle(fontWeight: FontWeight.bold)),
+                      ),
+                      const SizedBox(height: 5),
+                      TextField(
+                        controller: umaController,
+                        keyboardType: const TextInputType.numberWithOptions(
+                            decimal: true),
+                        decoration: const InputDecoration(
+                          hintText: 'Ej. 113.14',
+                          border: OutlineInputBorder(),
+                          isDense: true,
+                          focusedBorder: OutlineInputBorder(
+                            borderSide: BorderSide(color: customGreen),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 5),
+                      const Text(
+                        'Nota: El conteo de bienes filtrará solo aquellos >= 20 UMAS.',
+                        style: TextStyle(
+                            fontSize: 11,
+                            color: Colors.grey,
+                            fontStyle: FontStyle.italic),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              actions: <Widget>[
+                TextButton(
+                  onPressed: () => Navigator.of(context).pop(null),
+                  style: TextButton.styleFrom(foregroundColor: customGreen),
+                  child: const Text('CANCELAR'),
+                ),
+                ElevatedButton(
+                  onPressed: () {
+                    if (!validarYear()) {
+                      setState(() {});
+                      return;
+                    }
+                    final double umaVal = double.tryParse(
+                            umaController.text.replaceAll(',', '.')) ??
+                        113.14;
+                    final int yearVal =
+                        int.tryParse(yearController.text) ?? 2024;
+
+                    Navigator.of(context).pop({
+                      'unidad': unidad,
+                      'anio': yearVal,
+                      'umaValue': umaVal,
+                    });
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: customGreen,
+                    foregroundColor: Colors.white,
+                  ),
+                  child: const Text('GENERAR REPORTE'),
+                ),
+              ],
+            ),
+          );
+        },
+      );
+    },
+  );
+
+  if (result == null) return;
+
+  final String filtroUnidad = result['unidad'];
+  final int anioSeleccionado = result['anio'];
+  final double umaValue = result['umaValue'];
+  final double limiteUMA = umaValue * 20.0;
+
+  // ---------------------------------------------------------------------------
+  // 3. OBTENCIÓN Y PROCESAMIENTO DE DATOS DESDE POCKETBASE
+  // ---------------------------------------------------------------------------
+  showDialog(
+    context: context,
+    barrierDismissible: false,
+    builder: (_) => AlertDialog(
+      content: Row(
+        children: <Widget>[
+          CircularProgressIndicator(
+              valueColor: AlwaysStoppedAnimation<Color>(customGreen)),
+          const SizedBox(width: 20),
+          Expanded(
+              child: Text(
+                  'Procesando depreciación acumulada hasta $anioSeleccionado...')),
+        ],
+      ),
+    ),
+  );
+
+  try {
+    final Map<String, Map<String, dynamic>> resumen = {};
+
+    DateTime? _parseFecha(dynamic f) {
+      try {
+        if (f == null || (f is String && f.isEmpty)) return null;
+        final iso = DateTime.tryParse(f.toString());
+        if (iso != null) return iso;
+        return DateFormat('dd/MM/yyyy').parse(f.toString(), true).toLocal();
+      } catch (_) {
+        return null;
+      }
+    }
+
+    final cutoff = DateTime(2020, 1, 1);
+    // --- PASO A: Procesar "bienesmuebles" ---
+    String filtroBienes = "";
+    if (filtroUnidad != 'TODOS') {
+      filtroBienes =
+          "nivel1organizacion = '${filtroUnidad.replaceAll("'", "''")}'";
+    }
+
+    int pageBienes = 1;
+    bool hasMoreBienes = true;
+    while (hasMoreBienes) {
+      String urlBienesStr =
+          '$pbBaseUrl/fastapi/bienesmuebles?page=$pageBienes&perPage=500';
+      if (filtroBienes.isNotEmpty) {
+        urlBienesStr += '&filter=${Uri.encodeComponent(filtroBienes)}';
+      }
+
+      final resBienes = await http.get(
+        Uri.parse(urlBienesStr),
+        headers: {
+          'Authorization': 'Bearer $authToken',
+          'Content-Type': 'application/json',
+        },
+      );
+
+      if (resBienes.statusCode == 200) {
+        final decoded = json.decode(resBienes.body);
+        final items = decoded['items'] as List;
+
+        for (var data in items) {
+          final clase = (data['clasedeactivo'] ?? '').toString().trim();
+          if (clase.isEmpty) continue;
+
+          if (!resumen.containsKey(clase)) {
+            resumen[clase] = {'conteo': 0, 'depreciacion': 0.0};
+          }
+
+          final cotejo =
+              (data['cotejodoc'] ?? '').toString().trim().toUpperCase();
+          if (cotejo == 'NO') continue;
+
+          final double costo =
+              (data['importeinicialbien'] as num?)?.toDouble() ?? 0.0;
+          final double avaluo = (data['avaluo'] as num?)?.toDouble() ?? 0.0;
+          final fechaAdq = _parseFecha(data['fechaadquisicion']);
+
+          double valorEnLibros;
+          if (fechaAdq == null || fechaAdq.isBefore(cutoff)) {
+            valorEnLibros = (avaluo != 0.0) ? avaluo : costo;
+          } else {
+            valorEnLibros = (costo != 0.0) ? costo : avaluo;
+          }
+
+          if (valorEnLibros >= limiteUMA) {
+            resumen[clase]!['conteo'] = (resumen[clase]!['conteo'] as int) + 1;
+          }
+        }
+
+        if (pageBienes >= (decoded['totalPages'] ?? 1)) {
+          hasMoreBienes = false;
+        } else {
+          pageBienes++;
+        }
+      } else {
+        hasMoreBienes = false;
+        debugPrint('Error PB bienesmuebles: ${resBienes.body}');
+      }
+    }
+
+    // --- PASO B: Procesar "calculodepreciacion" ---
+    String filtroDep = "aniodepreciacion <= $anioSeleccionado";
+    if (filtroUnidad != 'TODOS') {
+      filtroDep +=
+          " && unidadpresupuestal = '${filtroUnidad.replaceAll("'", "''")}'";
+    }
+
+    int pageDep = 1;
+    bool hasMoreDep = true;
+    while (hasMoreDep) {
+      String urlDepStr =
+          '$pbBaseUrl/fastapi/calculodepreciacion?page=$pageDep&perPage=500';
+      if (filtroDep.isNotEmpty) {
+        urlDepStr += '&filter=${Uri.encodeComponent(filtroDep)}';
+      }
+
+      final resDep = await http.get(
+        Uri.parse(urlDepStr),
+        headers: {
+          'Authorization': 'Bearer $authToken',
+          'Content-Type': 'application/json',
+        },
+      );
+
+      if (resDep.statusCode == 200) {
+        final decoded = json.decode(resDep.body);
+        final items = decoded['items'] as List;
+
+        for (var data in items) {
+          final clase = (data['clasedeactivo'] ?? '').toString().trim();
+          final validClase = clase.isEmpty ? 'SIN DEFINIR' : clase;
+
+          if (!resumen.containsKey(validClase)) {
+            resumen[validClase] = {'conteo': 0, 'depreciacion': 0.0};
+          }
+
+          final double monto =
+              (data['depreciacion'] as num?)?.toDouble() ?? 0.0;
+          resumen[validClase]!['depreciacion'] =
+              (resumen[validClase]!['depreciacion'] as double) + monto;
+        }
+
+        if (pageDep >= (decoded['totalPages'] ?? 1)) {
+          hasMoreDep = false;
+        } else {
+          pageDep++;
+        }
+      } else {
+        hasMoreDep = false;
+        debugPrint('Error PB calculodepreciacion: ${resDep.body}');
+      }
+    }
+
+    // --- PASO C: Filtrado Final para el PDF ---
+    final List<String> clasesFinales = [];
+    final keysOrdenadas = resumen.keys.toList()..sort();
+
+    for (var k in keysOrdenadas) {
+      if (filtroUnidad == 'TODOS') {
+        clasesFinales.add(k);
+      } else {
+        final int c = resumen[k]!['conteo'];
+        final double d = resumen[k]!['depreciacion'];
+        if (c > 0 || d > 0) {
+          clasesFinales.add(k);
+        }
+      }
+    }
+
+    if (clasesFinales.isEmpty) {
+      Navigator.of(context).pop();
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+            content: Text(
+                '⚠️ No hay información para generar el reporte con los criterios seleccionados.')),
+      );
+      return;
+    }
+
+    // ---------------------------------------------------------------------------
+    // 4. GENERACIÓN DE PDF
+    // ---------------------------------------------------------------------------
+    final pdf = pw.Document();
+    final logoData = await rootBundle.load('assets/images/logopjev.png');
+    final logoBytes = logoData.buffer.asUint8List();
+    final fmt =
+        NumberFormat.currency(locale: 'es_MX', symbol: '\$', decimalDigits: 2);
+    final fechaHora = DateFormat('dd/MM/yyyy HH:mm').format(DateTime.now());
+
+    // Totales Generales
+    int totalBienesReporte = 0;
+    double totalDepreciacionReporte = 0.0;
+    for (var k in clasesFinales) {
+      totalBienesReporte += (resumen[k]!['conteo'] as int);
+      totalDepreciacionReporte += (resumen[k]!['depreciacion'] as double);
+    }
+
+    pw.Widget buildHeader(pw.Context context) {
+      return pw.Column(children: [
+        pw.Row(
+          mainAxisAlignment: pw.MainAxisAlignment.spaceBetween,
+          children: [
+            pw.Image(pw.MemoryImage(logoBytes), width: 100, height: 50),
+            pw.Column(
+              crossAxisAlignment: pw.CrossAxisAlignment.center,
+              children: [
+                pw.Text('PODER JUDICIAL DEL ESTADO DE VERACRUZ',
+                    style: pw.TextStyle(
+                        fontWeight: pw.FontWeight.bold, fontSize: 12)),
+                pw.SizedBox(height: 4),
+                pw.Text(
+                    'RESUMEN DE DEPRECIACIÓN ACUMULADA Y BIENES PATRIMONIALES',
+                    style: pw.TextStyle(
+                        fontWeight: pw.FontWeight.bold, fontSize: 10)),
+                pw.Text('ACUMULADO AL EJERCICIO $anioSeleccionado',
+                    style: pw.TextStyle(
+                        fontWeight: pw.FontWeight.bold, fontSize: 10)),
+                pw.SizedBox(height: 2),
+                if (filtroUnidad != 'TODOS')
+                  pw.Text('Unidad: $filtroUnidad',
+                      style: const pw.TextStyle(fontSize: 9))
+                else
+                  pw.Text('REPORTE GENERAL (TODAS LAS UNIDADES)',
+                      style: const pw.TextStyle(fontSize: 9)),
+              ],
+            ),
+            pw.Column(
+              crossAxisAlignment: pw.CrossAxisAlignment.end,
+              children: [
+                pw.Text('Criterio Bienes: >= 20 UMAS',
+                    style: const pw.TextStyle(fontSize: 7)),
+                pw.Text('Valor UMA: \$${umaValue.toStringAsFixed(2)}',
+                    style: const pw.TextStyle(fontSize: 7)),
+                pw.SizedBox(height: 2),
+                pw.Text('Generado: $fechaHora',
+                    style: const pw.TextStyle(fontSize: 7)),
+              ],
+            ),
+          ],
+        ),
+        pw.SizedBox(height: 15),
+      ]);
+    }
+
+    final List<pw.TableRow> filasTabla = [];
+
+    filasTabla.add(
+      pw.TableRow(
+        decoration: const pw.BoxDecoration(color: PdfColors.grey300),
+        children: [
+          pw.Padding(
+              padding: const pw.EdgeInsets.all(5),
+              child: pw.Center(
+                  child: pw.Text('CLASE DE ACTIVO',
+                      style: pw.TextStyle(
+                          fontWeight: pw.FontWeight.bold, fontSize: 9)))),
+          pw.Padding(
+              padding: const pw.EdgeInsets.all(5),
+              child: pw.Center(
+                  child: pw.Text('No. de Bienes\n(>= 20 UMAS)',
+                      textAlign: pw.TextAlign.center,
+                      style: pw.TextStyle(
+                          fontWeight: pw.FontWeight.bold, fontSize: 8)))),
+          pw.Padding(
+              padding: const pw.EdgeInsets.all(5),
+              child: pw.Center(
+                  child: pw.Text(
+                      'Depreciación Acumulada\n(hasta $anioSeleccionado)',
+                      textAlign: pw.TextAlign.right,
+                      style: pw.TextStyle(
+                          fontWeight: pw.FontWeight.bold, fontSize: 8)))),
+        ],
+      ),
+    );
+
+    for (var clase in clasesFinales) {
+      final int conteo = resumen[clase]!['conteo'];
+      final double dep = resumen[clase]!['depreciacion'];
+
+      filasTabla.add(
+        pw.TableRow(
+          children: [
+            pw.Padding(
+                padding: const pw.EdgeInsets.all(4),
+                child: pw.Text(clase, style: const pw.TextStyle(fontSize: 8))),
+            pw.Padding(
+                padding: const pw.EdgeInsets.all(4),
+                child: pw.Text('$conteo',
+                    textAlign: pw.TextAlign.center,
+                    style: const pw.TextStyle(fontSize: 8))),
+            pw.Padding(
+                padding: const pw.EdgeInsets.all(4),
+                child: pw.Align(
+                    alignment: pw.Alignment.centerRight,
+                    child: pw.Text(fmt.format(dep),
+                        style: const pw.TextStyle(fontSize: 8)))),
+          ],
+        ),
+      );
+    }
+
+    filasTabla.add(
+      pw.TableRow(
+        decoration: const pw.BoxDecoration(color: PdfColors.grey200),
+        children: [
+          pw.Padding(
+              padding: const pw.EdgeInsets.all(5),
+              child: pw.Text('TOTAL GENERAL',
+                  style: pw.TextStyle(
+                      fontWeight: pw.FontWeight.bold, fontSize: 9))),
+          pw.Padding(
+              padding: const pw.EdgeInsets.all(5),
+              child: pw.Text('$totalBienesReporte',
+                  textAlign: pw.TextAlign.center,
+                  style: pw.TextStyle(
+                      fontWeight: pw.FontWeight.bold, fontSize: 9))),
+          pw.Padding(
+              padding: const pw.EdgeInsets.all(5),
+              child: pw.Align(
+                  alignment: pw.Alignment.centerRight,
+                  child: pw.Text(fmt.format(totalDepreciacionReporte),
+                      style: pw.TextStyle(
+                          fontWeight: pw.FontWeight.bold, fontSize: 9)))),
+        ],
+      ),
+    );
+
+    pdf.addPage(
+      pw.MultiPage(
+        pageFormat: PdfPageFormat.letter.landscape,
+        margin: const pw.EdgeInsets.all(20),
+        header: buildHeader,
+        footer: (context) => pw.Align(
+          alignment: pw.Alignment.centerRight,
+          child: pw.Text(
+              'Página ${context.pageNumber} de ${context.pagesCount}',
+              style: const pw.TextStyle(fontSize: 8)),
+        ),
+        build: (context) => [
+          pw.Table(
+            border: pw.TableBorder.all(width: 0.5, color: PdfColors.grey400),
+            columnWidths: {
+              0: const pw.FlexColumnWidth(6),
+              1: const pw.FlexColumnWidth(2),
+              2: const pw.FlexColumnWidth(3),
+            },
+            children: filasTabla,
+          ),
+        ],
+      ),
+    );
+
+    final bytes = await pdf.save();
+    Navigator.of(context).pop(); // Cerrar loader
+
+    final sufijo = (filtroUnidad != 'TODOS')
+        ? '_${filtroUnidad.replaceAll(RegExp(r'[^A-Za-z0-9]+'), '_')}'
+        : '_GLOBAL';
+    final fileName =
+        'DepreciacionAcumulada_Hasta${anioSeleccionado}$sufijo.pdf';
+
+    final blob = html.Blob([bytes], 'application/pdf');
+    final url = html.Url.createObjectUrlFromBlob(blob);
+    final anchor = html.AnchorElement(href: url)
+      ..target = 'webbrowser'
+      ..download = fileName
+      ..click();
+    html.Url.revokeObjectUrl(url);
+
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+      content: Text('✅ PDF generado: $fileName'),
+      backgroundColor: customGreen,
+      duration: const Duration(seconds: 5),
+    ));
+  } catch (e) {
+    Navigator.of(context).pop();
+    debugPrint('❌ Error: $e');
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+      content: Text('❌ Error al generar reporte: $e'),
+      backgroundColor: Colors.red,
+    ));
+  }
+}

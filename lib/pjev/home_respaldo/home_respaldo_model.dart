@@ -1,0 +1,33 @@
+import '/backend/backend.dart';
+import '/flutter_flow/flutter_flow_util.dart';
+import '/index.dart';
+import 'home_respaldo_widget.dart' show HomeRespaldoWidget;
+import 'package:flutter/material.dart';
+
+class HomeRespaldoModel extends FlutterFlowModel<HomeRespaldoWidget> {
+  ///  Local state fields for this page.
+
+  List<BienesmueblesRecord> listabienesPage = [];
+  void addToListabienesPage(BienesmueblesRecord item) =>
+      listabienesPage.add(item);
+  void removeFromListabienesPage(BienesmueblesRecord item) =>
+      listabienesPage.remove(item);
+  void removeAtIndexFromListabienesPage(int index) =>
+      listabienesPage.removeAt(index);
+  void insertAtIndexInListabienesPage(int index, BienesmueblesRecord item) =>
+      listabienesPage.insert(index, item);
+  void updateListabienesPageAtIndex(
+          int index, Function(BienesmueblesRecord) updateFn) =>
+      listabienesPage[index] = updateFn(listabienesPage[index]);
+
+  ///  State fields for stateful widgets in this page.
+
+  // Stores action output result for [Custom Action - cardex] action in Button widget.
+  int? numerosumar2;
+
+  @override
+  void initState(BuildContext context) {}
+
+  @override
+  void dispose() {}
+}
